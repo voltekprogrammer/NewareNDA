@@ -68,6 +68,7 @@ def read_nda(file, software_cycle_number, cycle_mode='chg'):
             'auto': Identifies the first non-rest state as the incremental state.
     Returns:
         df (pd.DataFrame): DataFrame containing all records in the file
+        active_mass (float | None): Active mass in ug if it is present in the file, None otherwise (only happens in _read_nda_130)
     """
     with open(file, "rb") as f:
         mm = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
@@ -94,9 +95,9 @@ def read_nda(file, software_cycle_number, cycle_mode='chg'):
 
         # version specific settings
         if nda_version == 29:
-            output, aux = _read_nda_29(mm)
+            output, aux, active_mass = _read_nda_29(mm)
         elif nda_version == 130:
-            output, aux = _read_nda_130(mm)
+            output, aux, active_mass = _read_nda_130(mm)
         else:
             logger.error(f"nda version {nda_version} is not yet supported!")
             raise NotImplementedError(f"nda version {nda_version} is not yet supported!")
@@ -126,7 +127,7 @@ def read_nda(file, software_cycle_number, cycle_mode='chg'):
         df['Cycle'] = _generate_cycle_number(df, cycle_mode)
     df = df.astype(dtype=dtype_dict)
 
-    return df
+    return df, active_mass
 
 
 def _read_nda_29(mm):
@@ -177,7 +178,7 @@ def _read_nda_29(mm):
                     and bytes[82:87] == b'\x00\x00\x00\x00'):
                 aux.append(_aux_bytes_to_list(bytes))
 
-    return output, aux
+    return output, aux, active_mass
 
 
 def _read_nda_130(mm):
@@ -216,6 +217,7 @@ def _read_nda_130(mm):
 
     # Find footer data block
     footer = mm.rfind(b'\x06\x00\xf0\x1d\x81\x00\x03\x00\x61\x90\x71\x90\x02\x7f\xff\x00', 1024)
+    active_mass = None
     if footer != -1:
         mm.seek(footer+16)
         bytes = mm.read(499)
@@ -231,7 +233,12 @@ def _read_nda_130(mm):
         remarks = remarks.replace(chr(0), '').strip()
         logger.info(f"Remarks: {remarks}")
 
-    return output, aux
+    if active_mass is not None:
+        active_mass *= 1000  # convert to ug
+    else :
+        logger.warning("Active mass not found in nda file (v130).")
+
+    return output, aux, active_mass
 
 
 def _valid_record(bytes):

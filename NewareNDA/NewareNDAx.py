@@ -33,7 +33,9 @@ def read_ndax(file, software_cycle_number=False, cycle_mode='chg'):
             'auto': Identifies the first non-rest state as the incremental state.
     Returns:
         df (pd.DataFrame): DataFrame containing all records in the file
+        active_mass (float | None): Active mass in ug if it is present in the file, None otherwise.
     """
+    active_mass = None
     with tempfile.TemporaryDirectory() as tmpdir:
         zf = zipfile.PyZipFile(file)
 
@@ -57,6 +59,7 @@ def read_ndax(file, software_cycle_number=False, cycle_mode='chg'):
             active_mass = float(config.find('Head_Info/SCQ').attrib['Value'])
             logger.info(f"Active mass: {active_mass/1000} mg")
         except Exception:
+            logger.warning("Active mass not foud in ndax file.")
             pass
 
         # Find all auxiliary channel files
@@ -164,7 +167,7 @@ def read_ndax(file, software_cycle_number=False, cycle_mode='chg'):
     if software_cycle_number:
         data_df['Cycle'] = _generate_cycle_number(data_df, cycle_mode)
 
-    return data_df.astype(dtype=dtype_dict)
+    return data_df.astype(dtype=dtype_dict), active_mass
 
 
 def _data_interpolation(df):
