@@ -79,19 +79,19 @@ def read_nda(file, software_cycle_number, cycle_mode='chg'):
 
         # Get the file version
         [nda_version] = struct.unpack('<B', mm[14:15])
-        logger.info(f"NDA version: {nda_version}")
+        logger.debug(f"NDA version: {nda_version}")
 
         # Try to find server and client version info
         version_loc = mm.find(b'BTSServer')
         if version_loc != -1:
             mm.seek(version_loc)
             server = mm.read(50).strip(b'\x00').decode()
-            logger.info(f"Server: {server}")
+            logger.debug(f"Server: {server}")
             mm.seek(50, 1)
             client = mm.read(50).strip(b'\x00').decode()
-            logger.info(f"Client: {client}")
+            logger.debug(f"Client: {client}")
         else:
-            logger.info("BTS version not found!")
+            logger.warning("BTS version not found!")
 
         # version specific settings
         if nda_version == 29:
@@ -136,13 +136,13 @@ def _read_nda_29(mm):
 
     # Get the active mass
     [active_mass] = struct.unpack('<I', mm[152:156])
-    logger.info(f"Active mass: {active_mass/1000} mg")
+    logger.debug(f"Active mass: {active_mass/1000} mg")
 
     try:
         remarks = mm[2317:2417].decode('ASCII')
         # Clean null characters
         remarks = remarks.replace(chr(0), '').strip()
-        logger.info(f"Remarks: {remarks}")
+        logger.debug(f"Remarks: {remarks}")
     except UnicodeDecodeError:
         logger.warning("Converting remark bytes into ASCII failed")
         remarks = ""
@@ -224,14 +224,14 @@ def _read_nda_130(mm):
 
         # Get the active mass
         [active_mass] = struct.unpack('<d', bytes[-8:])
-        logger.info(f"Active mass: {active_mass} mg")
+        logger.debug(f"Active mass: {active_mass} mg")
 
         # Get the remarks
         remarks = bytes[363:491].decode('ASCII')
 
         # Clean null characters
         remarks = remarks.replace(chr(0), '').strip()
-        logger.info(f"Remarks: {remarks}")
+        logger.debug(f"Remarks: {remarks}")
 
     if active_mass is not None:
         active_mass *= 1000  # convert to ug

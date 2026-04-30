@@ -44,10 +44,10 @@ def read_ndax(file, software_cycle_number=False, cycle_mode='chg'):
             version_info = zf.extract('VersionInfo.xml', path=tmpdir)
             with open(version_info, 'r', encoding='gb2312') as f:
                 config = ET.fromstring(f.read()).find('config/ZwjVersion')
-            logger.info(f"Server version: {config.attrib['SvrVer']}")
-            logger.info(f"Client version: {config.attrib['CurrClientVer']}")
-            logger.info(f"Control unit version: {config.attrib['ZwjVersion']}")
-            logger.info(f"Tester version: {config.attrib['MainXwjVer']}")
+            logger.debug(f"Server version: {config.attrib['SvrVer']}")
+            logger.debug(f"Client version: {config.attrib['CurrClientVer']}")
+            logger.debug(f"Control unit version: {config.attrib['ZwjVersion']}")
+            logger.debug(f"Tester version: {config.attrib['MainXwjVer']}")
         except Exception:
             pass
 
@@ -57,7 +57,7 @@ def read_ndax(file, software_cycle_number=False, cycle_mode='chg'):
             with open(step, 'r', encoding='gb2312') as f:
                 config = ET.fromstring(f.read()).find('config')
             active_mass = float(config.find('Head_Info/SCQ').attrib['Value'])
-            logger.info(f"Active mass: {active_mass/1000} mg")
+            logger.debug(f"Active mass: {active_mass/1000} mg")
         except Exception:
             logger.warning("Active mass not foud in ndax file.")
             pass
@@ -175,7 +175,7 @@ def _data_interpolation(df):
     Some ndax from from BTS Server 8 do not seem to contain a complete dataset.
     This helper function fills in missing times, capacities, and energies.
     """
-    logger.info(
+    logger.debug(
         "The output from NewareNDA contains interpolated data in the fields "
         "Time, Timestamp, Capacity, and Energy."
     )
