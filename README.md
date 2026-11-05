@@ -30,8 +30,10 @@ pip install .
 # Usage
 ```
 import NewareNDA
-df = NewareNDA.read('filename.nda')
+df, active_mass = NewareNDA.read('filename.nda')
 ```
+
+This fork returns the records and active mass in micrograms (`None` when absent).
 
 ## Logging
 Additional test information including active mass, remarks, and BTS versions is returned via [logging](https://docs.python.org/3/library/logging.html). The following command will print this logging information to the terminal:

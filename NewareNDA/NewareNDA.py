@@ -33,6 +33,7 @@ def read(file, software_cycle_number=True, cycle_mode='chg', log_level='INFO'):
             Options: 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET'
     Returns:
         df (pd.DataFrame): DataFrame containing all records in the file
+        active_mass (float | None): Active mass in ug, if the file records one
     """
 
     # Set up logging
