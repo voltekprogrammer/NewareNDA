@@ -35,7 +35,7 @@ def main():
                         help='Selects how the cycle is incremented.')
     args = parser.parse_args()
 
-    df = NewareNDA.read(args.in_file, args.no_software_cycle_number, cycle_mode=args.cycle_mode, log_level=args.log_level)
+    df, _active_mass = NewareNDA.read(args.in_file, args.no_software_cycle_number, cycle_mode=args.cycle_mode, log_level=args.log_level)
     output_cmd[args.format](df, args.out_file)
 
 
